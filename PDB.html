@@ -1,0 +1,190 @@
+
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DNA-transcription factor binding sites</title>
+
+
+    
+<script src="/projects/mutabind/prj-sunddg/static/myjs/myjs.js?v=0.2"></script>
+<script>
+if (window.location.protocol != "https:" & window.location.href.substring(window.location.protocol.length,15) == "//www.ncbi")
+    window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+</script>
+
+
+
+</head>
+<body>
+
+
+
+<div class="row">
+   
+    <hr>
+
+    <div class="small-10 small-offset-1 end column">
+        <!--Content here-->
+        
+
+
+
+
+
+
+<p class="text-justify"><strong>DNA-transcription factor binding sites</strong> This is a web server for analyzing the binding
+sites between double-standed DNA and transcription factors. It is able to allow users to search and analyze the DNA-transcription
+factor binding sites from a user-provided PDB ID(the structure identifier used in the Protein data Bank) or a PDB-formatted file.
+ <span style="color: #FF0000">This web will help researchers to understand the molecular details of how the transcription factors recognize DNA and provide important clues for therapeutic targeting of oncogenic transcription factors.</span></p>
+
+
+
+
+
+<style>
+h6.left {
+    margin-right:1rem;
+    display:block;
+}
+.subindex 
+{
+    vertical-align:sub;
+    font-size:60%;
+ }
+</style>
+
+
+
+
+
+
+<br>
+<hr>
+<h3> Step 1 - Select Protein Complex </h3>
+
+<br>
+
+<form method="post" id="pdb_form" enctype="multipart/form-data">
+    <input type='hidden' name='csrfmiddlewaretoken' value='SClLZ52KU3cZcBb8U1Y7SyWf8BKgonkE' />
+    <input type="hidden" id="example" name="example" value="0">
+    <input type="hidden" id="pdb_container_asu" name="pdb_container_asu" value="">
+    <input type="hidden" id="pdb_container_bio" name="pdb_container_bio" value="">
+    <input type="hidden" id="isNMR" name="isNMR" value="0">
+    <div class="row">
+        <div class="small-3 columns">
+            <label for="pdb_id_input" class="left" style="font-size:1.3rem">Input PDB code:</label>
+        </div>
+        <div class="small-3 columns">
+            <input type="text" id="pdb_id_input" name="pdb_id" style="margin-bottom:0.5rem" placeholder="PDB id code [4-letter code]" class="radius" />
+            <span class="subheader"> Example: <a id="load_example">1CSE</a></span>
+        </div>
+        <div class="small-1 columns">
+                <div class="switch radius small ">
+                    <input id="pdb_bio" type="radio" checked name="pdb_mol" value="bio">
+                    <label for="pdb_bio"> Bioassembly</label>
+					
+					
+					<div class="small-1 columns">
+                        <select id="bioassemblies" name="bioassembly" style="margin:0;height: 2em;padding: 0;width: 3.4em;">
+						<option value="1">1st</option>
+						</select>
+					</div>
+					
+                </div>
+                <div class="switch radius small ">
+                    <input id="pdb_asu" type="radio" name="pdb_mol" value="asu">
+                    <label for="pdb_asu">Asymmetric Unit</label>
+                </div>
+        </div>
+        
+		
+   
+
+      
+    </div>
+	
+	
+	<div class="row">
+        <button type = "submit" id = "btn_submit" onclick = "download()"> download </button>
+    </div>
+	
+	
+    <div class="row">
+        <div class="small-5 small-offset-7 columns end">
+            <div id="nmr_warning" style="font-size:0.8rem;color:red"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-12 columns" >
+            <div id="pdb_description"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-12 columns" >
+            <div id="large_warning"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div data-alert class="small-12 columns">
+            <div id="pdb_warning" data-alert class="small-12 columns">
+                <!-- <p id="pdb_warning"></p> -->
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="small-3 columns">
+            <label for="pdb_file_input" class="left" style="font-size:1.3rem">Upload PDB file:</label>
+        </div>
+        <div class="small-6 columns">
+            <input type="file" id="pdb_file_input" name="pdb_file" class="radius" onchange="fileChange(this);"/>
+        </div>
+		<div class="small-3 columns">
+            <input type="text" id="pdb_id_input1" name="pdb_id1" style="margin-bottom:0.5rem" placeholder="PDB id code [4-letter code]" class="radius" />
+        </div>
+    </div>
+	
+	
+	
+    <div class="row">
+        <div class="small-6 columns">
+            <label style="font-size:1.1rem">Format description for uploaded file: 
+				<a href="#" title="Uploaded file should follow the standard PDB format. If uploaded file includes multiple models (ex: bio-assembly or NMR structures), please make sure that file does not contain 'MODEL' tags (as used in PDB bioassembly files) and does not contain duplicated chain identifiers. Chain identifier should only use upper and lower-case letters.">!!!</a>
+			</label>
+        </div>
+    </div>
+	
+	
+	<div class="row">
+        <button type = "submit" id = "btn_submit" onclick = "btnAction()"> search </button>
+    </div>
+	
+	
+	
+	
+	
+    
+
+</form>
+
+
+<script>
+    var v =  document.getElementById("pdb_id_input").value
+	function download(){
+		link1 = "https://files.rcsb.org/download/"+document.getElementById("pdb_id_input").value+ ".pdb"
+		window.open(link1)
+	}
+	
+	function btnAction(){
+	     
+		var link =  "https://www.rcsb.org/3d-sequence/"+ document.getElementById("pdb_id_input1").value +"?assemblyld = 1"
+		window.open(link)
+	}
+	
+
+</script>
+
+
